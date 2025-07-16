@@ -46,7 +46,7 @@ func main() {
 			continue
 		}
 		labelsJson, _ := json.Marshal(msg.PredictedLabels)
-		sql := "UPDATE image_samples SET predicted_labels = jsonb_set(coalesce(predicted_labels, '{}'), '{" + msg.Model + "}', ?) WHERE id = ?;"
+		sql := "UPDATE images SET predicted_labels = jsonb_set(coalesce(predicted_labels, '{}'), '{" + msg.Model + "}', ?) WHERE id = ?;"
 		if err := db.Exec(sql, string(labelsJson), msg.ImageID).Error; err != nil {
 			log.Printf("DB update error: %v", err)
 		} else {

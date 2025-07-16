@@ -15,8 +15,8 @@ type UIElement struct {
 }
 
 type JobPayload struct {
-	ImageID     string `json:"image_id"`
-	Base64Image string `json:"base64_image"`
+	ImageID     string `json:"id"`
+	Base64Image string `json:"image_base64"`
 }
 
 type PredictionResult struct {

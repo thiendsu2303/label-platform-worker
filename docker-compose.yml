@@ -24,14 +24,14 @@ services:
     networks:
       - label-platform-network
 
-  # result-consumer:
-  #   build: ./worker-result-consumer
-  #   environment:
-  #     REDIS_ADDR: label-platform-redis:6379
-  #     REDIS_PASSWORD: ""
-  #     POSTGRES_DSN: "host=label-platform-postgres user=postgres password=password dbname=label_platform port=5432 sslmode=disable"
-  #   networks:
-  #     - label-platform-network
+  result-consumer:
+    build: ./worker-result-consumer
+    environment:
+      REDIS_ADDR: label-platform-redis:6379
+      REDIS_PASSWORD: ""
+      POSTGRES_DSN: "host=label-platform-postgres user=postgres password=password dbname=label_platform port=5432 sslmode=disable"
+    networks:
+      - label-platform-network
 
 networks:
   label-platform-network:
