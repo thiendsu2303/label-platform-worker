@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"os"
 	"strings"
 
@@ -22,8 +23,9 @@ Only output valid JSON, no explanation.
 
 Here is the base64 image string: ` + base64Image
 
+	log.Printf("Call OpenAI GPT-4 API with prompt length: %d", len(prompt))
 	resp, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
-		Model: openai.GPT4,
+		Model: "gpt-3.5-turbo",
 		Messages: []openai.ChatCompletionMessage{
 			{
 				Role:    openai.ChatMessageRoleUser,
@@ -34,9 +36,11 @@ Here is the base64 image string: ` + base64Image
 		Temperature: 0,
 	})
 	if err != nil || len(resp.Choices) == 0 {
+		log.Printf("OpenAI API error: %v", err)
 		return PredictionResult{Elements: []UIElement{}}
 	}
 	content := resp.Choices[0].Message.Content
+	log.Printf("OpenAI API response: %s", content)
 	// Tìm đoạn JSON trong content (nếu có text thừa)
 	start := strings.Index(content, "{")
 	end := strings.LastIndex(content, "}")
