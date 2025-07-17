@@ -1,27 +1,52 @@
 package main
 
 import (
-	"math/rand"
+	"context"
+	"encoding/json"
+	"os"
+	"strings"
+
+	openai "github.com/sashabaranov/go-openai"
 )
 
-// CallGPT4 mô phỏng xử lý model GPT-4
+// CallGPT4 gọi OpenAI GPT-4 thường với prompt chi tiết, trả về PredictionResult đúng format ground_truth
 func CallGPT4(base64Image string) PredictionResult {
-	return PredictionResult{
-		Elements: []UIElement{
+	apiKey := os.Getenv("OPENAI_API_KEY")
+
+	client := openai.NewClient(apiKey)
+	prompt := `You are an expert UI analyzer. Given a UI design image in base64 string, your task is to detect and return all UI elements of the following types only: Button, Input, Radio, Drop (Dropdown). For each element, return its type, position (x, y), width, height, and text (if any). For Input, include the placeholder if available.
+
+Output format (JSON): { "elements": [ ... ] }
+
+Only output valid JSON, no explanation.
+
+Here is the base64 image string: ` + base64Image
+
+	resp, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
+		Model: openai.GPT4,
+		Messages: []openai.ChatCompletionMessage{
 			{
-				Type:     "button",
-				Text:     "Button",
-				Width:    100 + rand.Intn(20),
-				Height:   40 + rand.Intn(10),
-				Position: Position{X: rand.Float64() * 1000, Y: rand.Float64() * 500},
-			},
-			{
-				Type:        "input",
-				Width:       280 + rand.Intn(20),
-				Height:      50 + rand.Intn(10),
-				Position:    Position{X: rand.Float64() * 1000, Y: rand.Float64() * 500},
-				Placeholder: "Input",
+				Role:    openai.ChatMessageRoleUser,
+				Content: prompt,
 			},
 		},
+		MaxTokens:   2048,
+		Temperature: 0,
+	})
+	if err != nil || len(resp.Choices) == 0 {
+		return PredictionResult{Elements: []UIElement{}}
 	}
+	content := resp.Choices[0].Message.Content
+	// Tìm đoạn JSON trong content (nếu có text thừa)
+	start := strings.Index(content, "{")
+	end := strings.LastIndex(content, "}")
+	if start == -1 || end == -1 || end <= start {
+		return PredictionResult{Elements: []UIElement{}}
+	}
+	jsonStr := content[start : end+1]
+	var result PredictionResult
+	if err := json.Unmarshal([]byte(jsonStr), &result); err != nil {
+		return PredictionResult{Elements: []UIElement{}}
+	}
+	return result
 }

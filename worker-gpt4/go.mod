@@ -2,7 +2,10 @@ module worker-gpt4
 
 go 1.21
 
-require github.com/redis/go-redis/v9 v9.0.0
+require (
+	github.com/redis/go-redis/v9 v9.0.0
+	github.com/sashabaranov/go-openai v1.40.5
+)
 
 require (
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
