@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"log"
 	"os"
 	"strings"
 
@@ -63,5 +64,6 @@ Only output valid JSON, no explanation.`
 	if err := json.Unmarshal([]byte(jsonStr), &result); err != nil {
 		return PredictionResult{Elements: []UIElement{}}
 	}
+	log.Printf("Model raw response: %s", content)
 	return result
 }
